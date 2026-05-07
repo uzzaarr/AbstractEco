@@ -1,0 +1,27 @@
+❯ i will be able to add more projects easily ?like mor eprojects if i want
+
+● Yes, fairly easy — but it touches several files. Here's exactly what's needed for each new project:
+
+  Steps to add a new project
+
+  1. Add CAs to both Dune queries (7434732 and 7436536). In the project_contracts CTE, add new rows:
+  ('New Project Name', 0xContractAddress1),
+  ('New Project Name', 0xContractAddress2),
+  2. Re-execute both queries on Dune (manual click "Run", or wait for next Monday's cron with --force)
+  3. Add a logo image to public/ folder (e.g., public/newproject.png)
+  4. Add entry to src/lib/projectAssets.ts:
+  "new-project-name": {
+    logo: "/newproject.png",
+    color: "#FF6B35",  // pick a brand color
+  }
+  5. Push to GitHub — Vercel auto-deploys.
+
+  That's it. The frontend will automatically render the new project in all 4 tabs (Tracker bar chart, Gravity Pool bubble, Spotlight
+  card, Wallet Analytics rows).
+
+  ⚠️ Critical gotcha — the ID must match
+
+  The auto-generated ID is projectName.toLowerCase().replace(/\s+/g, '-'):
+  - "New Project Name" → new-project-name
+  - "Foo Bar" → foo-bar
+  - "DYLI Marketplace" → dyli-marketplace

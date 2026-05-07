@@ -1,0 +1,39 @@
+name: Weekly Dune data refresh
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Fetch Dune data
+        env:
+          DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+        run: npm run fetch-dune -- --force
+
+      - name: Commit refreshed cache
+        run: |
+          if [[ -n "$(git status --porcelain public/data)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/data
+            git commit -m "chore(data): weekly Dune refresh"
+            git push
+          else
+            echo "No data changes — nothing to commit."
+          fi

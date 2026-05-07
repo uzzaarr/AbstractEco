@@ -1,0 +1,130 @@
+{
+  "globalData": {
+    "totalVolume30d": 7136192.9,
+    "totalUsers30d": 29908,
+    "totalTrx30d": 33897995
+  },
+  "projects": [
+    {
+      "id": "relay",
+      "name": "Relay",
+      "stats30d": {
+        "volume": 5180473.48,
+        "users": 10621,
+        "trx": 35628
+      },
+      "volume": 5180473.48,
+      "users": 10621,
+      "trx": 35628
+    },
+    {
+      "id": "lifi",
+      "name": "LiFi",
+      "stats30d": {
+        "volume": 1401192.21,
+        "users": 2960,
+        "trx": 10770
+      },
+      "volume": 1401192.21,
+      "users": 2960,
+      "trx": 10770
+    },
+    {
+      "id": "maze-of-gain",
+      "name": "Maze of Gain",
+      "stats30d": {
+        "volume": 446483.75,
+        "users": 3440,
+        "trx": 64172
+      },
+      "volume": 446483.75,
+      "users": 3440,
+      "trx": 64172
+    },
+    {
+      "id": "dyli-marketplace",
+      "name": "DYLI Marketplace",
+      "stats30d": {
+        "volume": 62265.59,
+        "users": 726,
+        "trx": 17119
+      },
+      "volume": 62265.59,
+      "users": 726,
+      "trx": 17119
+    },
+    {
+      "id": "gigaverse",
+      "name": "Gigaverse",
+      "stats30d": {
+        "volume": 25721.09,
+        "users": 2917,
+        "trx": 20858
+      },
+      "volume": 25721.09,
+      "users": 2917,
+      "trx": 20858
+    },
+    {
+      "id": "moody-madness",
+      "name": "Moody Madness",
+      "stats30d": {
+        "volume": 15273.49,
+        "users": 6593,
+        "trx": 2843646
+      },
+      "volume": 15273.49,
+      "users": 6593,
+      "trx": 2843646
+    },
+    {
+      "id": "roach-racing",
+      "name": "Roach Racing",
+      "stats30d": {
+        "volume": 4184.43,
+        "users": 97,
+        "trx": 294
+      },
+      "volume": 4184.43,
+      "users": 97,
+      "trx": 294
+    },
+    {
+      "id": "kuga-bash",
+      "name": "Kuga Bash",
+      "stats30d": {
+        "volume": 328.13,
+        "users": 245,
+        "trx": 14453
+      },
+      "volume": 328.13,
+      "users": 245,
+      "trx": 14453
+    },
+    {
+      "id": "ruyi-ember",
+      "name": "Ruyi Ember",
+      "stats30d": {
+        "volume": 270.73,
+        "users": 64,
+        "trx": 1250
+      },
+      "volume": 270.73,
+      "users": 64,
+      "trx": 1250
+    },
+    {
+      "id": "rug-pull-bakery",
+      "name": "Rug Pull Bakery",
+      "stats30d": {
+        "volume": 0,
+        "users": 2245,
+        "trx": 30889805
+      },
+      "volume": 0,
+      "users": 2245,
+      "trx": 30889805
+    }
+  ],
+  "updatedAt": "2026-05-06T18:33:21.508Z"
+}
