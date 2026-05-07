@@ -152,7 +152,7 @@ Users metric for these two is inflated by bots. Volume for Rug Pull = $0 (bake i
 
 ---
 
-## Website Architecture (AI Studio build)
+## Website Architecture
 
 **Stack**: Vite + React + Express + Tailwind + Recharts + D3.js + Framer Motion
 
