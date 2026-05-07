@@ -48,11 +48,16 @@ const CustomTick = (props: any) => {
 export default function TrackerTab({ data }: { data: DashboardData }) {
   const [metric, setMetric] = useState<'volume' | 'trx'>('volume');
   
-  // Transform data for recharts
+  // Transform data for recharts. Relay is excluded from the volume view only —
+  // it dwarfs every other project and crushes the y-axis so the rest is unreadable.
   const chartData = useMemo(() => {
     if (!data.projects || data.projects.length === 0) return [];
-    
-    return data.projects.map(p => ({
+
+    const projects = metric === 'volume'
+      ? data.projects.filter(p => p.id !== 'relay')
+      : data.projects;
+
+    return projects.map(p => ({
       name: p.name,
       id: p.id,
       volume: p.stats30d.volume,
@@ -82,13 +87,16 @@ export default function TrackerTab({ data }: { data: DashboardData }) {
           >
             Volume (USD)
           </button>
-          <button 
+          <button
             onClick={() => setMetric('trx')}
             className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${metric === 'trx' ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-white'}`}
           >
             Transactions
           </button>
         </div>
+        {metric === 'volume' && (
+          <span className="text-[11px] text-zinc-500">Relay excluded for readability — see Spotlight for full ranking.</span>
+        )}
       </div>
 
       <div className="h-[400px] w-full relative z-10">
