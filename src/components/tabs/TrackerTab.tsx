@@ -48,13 +48,14 @@ const CustomTick = (props: any) => {
 export default function TrackerTab({ data }: { data: DashboardData }) {
   const [metric, setMetric] = useState<'volume' | 'trx'>('volume');
   
-  // Transform data for recharts. Relay is excluded from the volume view only —
-  // it dwarfs every other project and crushes the y-axis so the rest is unreadable.
+  // Transform data for recharts. Relay and LiFi are excluded from the volume view only —
+  // they dwarf every other project and crush the y-axis so the rest is unreadable.
+  const VOLUME_EXCLUDE = new Set(['relay', 'lifi']);
   const chartData = useMemo(() => {
     if (!data.projects || data.projects.length === 0) return [];
 
     const projects = metric === 'volume'
-      ? data.projects.filter(p => p.id !== 'relay')
+      ? data.projects.filter(p => !VOLUME_EXCLUDE.has(p.id))
       : data.projects;
 
     return projects.map(p => ({
@@ -95,7 +96,7 @@ export default function TrackerTab({ data }: { data: DashboardData }) {
           </button>
         </div>
         {metric === 'volume' && (
-          <span className="text-[11px] text-zinc-500">Relay excluded for readability — see Spotlight for full ranking.</span>
+          <span className="text-[11px] text-zinc-500">Relay and LiFi excluded for readability — see Spotlight for full ranking.</span>
         )}
       </div>
 
