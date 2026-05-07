@@ -199,6 +199,18 @@ export default function App() {
             />
           )}
         </section>
+
+        <footer className="pb-10 -mt-4 flex items-center justify-center text-xs text-zinc-500">
+          <span>Built by</span>
+          <a
+            href="https://x.com/0xAirr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1.5 text-zinc-300 hover:text-abstract-neon transition-colors font-medium"
+          >
+            @0xAirr
+          </a>
+        </footer>
       </main>
     </div>
   );
