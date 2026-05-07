@@ -1,7 +1,8 @@
 import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, ArrowUpRight, Activity, Users, DollarSign, Database, Flame, Zap } from 'lucide-react';
+import { Search, Activity, Users, DollarSign, Database, Zap } from 'lucide-react';
 import { DashboardData, ProjectData } from './types';
+import ProjectCard from './components/ProjectCard';
 
 // Lazy loaded tabs
 const TrackerTab = React.lazy(() => import('./components/tabs/TrackerTab'));
@@ -162,32 +163,36 @@ export default function App() {
 
         {/* Global Hero Metrics Moved Below */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-12">
-          <GlobalMetricCard 
-            title="Ecosystem Volume (30d)" 
-            value={formattedVolume} 
-            icon={<DollarSign className="w-5 h-5" />} 
+          <GlobalMetricCard
+            title="Ecosystem Volume (30d)"
+            value={formattedVolume}
+            icon={<DollarSign className="w-5 h-5" />}
           />
-          <GlobalMetricCard 
-            title="Total Users (30d)" 
-            value={(data.globalData?.totalUsers30d || 0).toLocaleString()} 
+          <GlobalMetricCard
+            title="Total Users (30d)"
+            value={(data.globalData?.totalUsers30d || 0).toLocaleString()}
             subtitle="(per-project sum)"
-            icon={<Users className="w-5 h-5" />} 
+            icon={<Users className="w-5 h-5" />}
           />
-          <GlobalMetricCard 
-            title="Total Transactions (30d)" 
-            value={data.globalData?.totalTrx30d >= 1000000 
-              ? `${(data.globalData.totalTrx30d / 1000000).toFixed(1)}M` 
-              : (data.globalData?.totalTrx30d || 0).toLocaleString()} 
+          <GlobalMetricCard
+            title="Total Transactions (30d)"
+            value={data.globalData?.totalTrx30d >= 1000000
+              ? `${(data.globalData.totalTrx30d / 1000000).toFixed(1)}M`
+              : (data.globalData?.totalTrx30d || 0).toLocaleString()}
             subtitle={`~${tps} tx/s avg`}
-            icon={<Activity className="w-5 h-5" />} 
+            icon={<Activity className="w-5 h-5" />}
           />
-          <GlobalMetricCard 
-            title="Top Performer" 
-            value={topGainer?.name || "N/A"} 
-            subtitle="Most Volume 30d"
-            icon={<Flame className="w-5 h-5" />} 
-            glow
-          />
+          {topGainer ? (
+            <ProjectCard project={topGainer} label="Top Performer · 30d Vol" glow />
+          ) : (
+            <GlobalMetricCard
+              title="Top Performer"
+              value="N/A"
+              subtitle="Most Volume 30d"
+              icon={<Activity className="w-5 h-5" />}
+              glow
+            />
+          )}
         </section>
       </main>
     </div>
