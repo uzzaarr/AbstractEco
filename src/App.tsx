@@ -1,6 +1,6 @@
 import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Activity, Users, DollarSign, Database, Zap } from 'lucide-react';
+import { Search, Activity, Users, DollarSign, Database } from 'lucide-react';
 import { DashboardData, ProjectData } from './types';
 import ProjectCard from './components/ProjectCard';
 
@@ -98,10 +98,12 @@ export default function App() {
       <nav className="sticky top-0 z-50 bg-[#0D0D0D]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-lg bg-abstract-neon/10 flex items-center justify-center border border-abstract-neon/20">
-               <Zap className="w-5 h-5 text-abstract-neon" />
-             </div>
-             <span className="text-lg font-semibold tracking-tight">Abstract<span className="text-abstract-neon">Dash</span></span>
+             <img
+               src="/logoeco.png"
+               alt="ABS ECO"
+               className="w-9 h-9 rounded-lg object-cover border border-white/10"
+             />
+             <span className="text-lg font-semibold tracking-tight">ABS<span className="text-abstract-neon"> ECO</span></span>
           </div>
           <div className="hidden md:flex relative group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-abstract-neon transition-colors" />
