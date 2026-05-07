@@ -169,12 +169,14 @@ export default function App() {
             title="Ecosystem Volume (30d)"
             value={formattedVolume}
             icon={<DollarSign className="w-5 h-5" />}
+            accent="#00FF66"
           />
           <GlobalMetricCard
             title="Total Users (30d)"
             value={(data.globalData?.totalUsers30d || 0).toLocaleString()}
             subtitle="(per-project sum)"
             icon={<Users className="w-5 h-5" />}
+            accent="#38BDF8"
           />
           <GlobalMetricCard
             title="Total Transactions (30d)"
@@ -183,6 +185,7 @@ export default function App() {
               : (data.globalData?.totalTrx30d || 0).toLocaleString()}
             subtitle={`~${tps} tx/s avg`}
             icon={<Activity className="w-5 h-5" />}
+            accent="#A78BFA"
           />
           {topGainer ? (
             <ProjectCard project={topGainer} label="Top Performer · 30d Vol" glow />
@@ -201,17 +204,59 @@ export default function App() {
   );
 }
 
-function GlobalMetricCard({ title, value, icon, subtitle, glow = false }: { title: string, value: string, icon: React.ReactNode, subtitle?: string, glow?: boolean }) {
+function GlobalMetricCard({
+  title,
+  value,
+  icon,
+  subtitle,
+  glow = false,
+  accent = '#00FF66',
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  subtitle?: string;
+  glow?: boolean;
+  accent?: string;
+}) {
   return (
-    <div className={`relative p-5 rounded-2xl bg-abstract-card backdrop-blur-md border border-white/5 flex flex-col gap-3 overflow-hidden ${glow ? 'border-abstract-neon/30 shadow-[0_0_30px_rgba(0,255,102,0.05)]' : ''}`}>
-       <div className="flex justify-between items-center text-zinc-400">
-         <span className="text-sm font-medium">{title}</span>
-         <div className={glow ? 'text-abstract-neon' : ''}>{icon}</div>
-       </div>
-       <div className="flex items-baseline gap-2">
-         <span className="text-2xl font-semibold tracking-tight text-white">{value}</span>
-         {subtitle && <span className="text-xs text-abstract-neon">{subtitle}</span>}
-       </div>
+    <div
+      className={`group relative p-5 rounded-2xl bg-abstract-card backdrop-blur-md border flex flex-col gap-3 overflow-hidden min-h-[140px] transition-all hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] ${
+        glow
+          ? 'border-abstract-neon/30 shadow-[0_0_30px_rgba(0,255,102,0.05)]'
+          : 'border-white/5'
+      }`}
+    >
+      <div
+        className="absolute -top-10 -right-10 w-32 h-32 blur-[55px] pointer-events-none rounded-full opacity-25 transition-opacity group-hover:opacity-50"
+        style={{ backgroundColor: accent }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-px opacity-50"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }}
+      />
+
+      <div className="flex justify-between items-center text-zinc-400 relative z-10">
+        <span className="text-sm font-medium">{title}</span>
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center border"
+          style={{
+            color: accent,
+            backgroundColor: `${accent}14`,
+            borderColor: `${accent}33`,
+          }}
+        >
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-baseline gap-2 relative z-10">
+        <span className="text-2xl font-semibold tracking-tight text-white">{value}</span>
+        {subtitle && (
+          <span className="text-xs" style={{ color: accent }}>
+            {subtitle}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
