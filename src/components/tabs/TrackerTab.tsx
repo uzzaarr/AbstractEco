@@ -99,7 +99,8 @@ export default function TrackerTab({ data }: { data: DashboardData }) {
         )}
       </div>
 
-      <div className="h-[400px] w-full relative z-10">
+      <div className="h-[400px] w-full relative z-10 overflow-x-auto overflow-y-hidden">
+        <div className="h-full min-w-[720px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
@@ -167,6 +168,7 @@ export default function TrackerTab({ data }: { data: DashboardData }) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

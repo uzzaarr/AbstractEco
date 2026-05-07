@@ -174,25 +174,27 @@ export default function GravityPoolTab({ data }: { data: DashboardData }) {
 
   return (
     <div className="bg-abstract-card border border-white/5 rounded-3xl p-6 shadow-2xl relative">
-      <div className="absolute top-6 left-6 z-10">
-        <h3 className="text-lg font-medium text-white mb-1">Gravity Pool</h3>
-        <p className="text-sm text-zinc-400">Physics-based simulation by {metricLabel}. Drag nodes to interact.</p>
-      </div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 relative z-10">
+        <div>
+          <h3 className="text-lg font-medium text-white mb-1">Gravity Pool</h3>
+          <p className="text-sm text-zinc-400">Physics-based simulation by {metricLabel}. Drag nodes to interact.</p>
+        </div>
 
-      <div className="absolute top-6 right-6 z-10 flex gap-1 p-1 bg-white/5 border border-white/10 rounded-full">
-        {(['volume', 'users'] as const).map(m => (
-          <button
-            key={m}
-            onClick={() => setMetric(m)}
-            className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-              metric === m
-                ? 'bg-abstract-neon text-[#0D0D0D]'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            {m === 'volume' ? 'Volume' : 'Users'}
-          </button>
-        ))}
+        <div className="flex gap-1 p-1 bg-white/5 border border-white/10 rounded-full self-start">
+          {(['volume', 'users'] as const).map(m => (
+            <button
+              key={m}
+              onClick={() => setMetric(m)}
+              className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                metric === m
+                  ? 'bg-abstract-neon text-[#0D0D0D]'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              {m === 'volume' ? 'Volume' : 'Users'}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div ref={containerRef} className="w-full h-[500px]" />
