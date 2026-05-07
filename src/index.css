@@ -17,6 +17,14 @@ body {
   min-height: 100vh;
 }
 
+/* Suppress browser default focus outlines on chart/SVG elements (Recharts bars,
+   D3 Gravity Pool nodes) — they show a white border on click that breaks the look. */
+.recharts-wrapper, .recharts-surface,
+.recharts-wrapper *, .recharts-surface *,
+svg, svg * {
+  outline: none !important;
+}
+
 /* Scrollbar tweaks */
 ::-webkit-scrollbar {
   width: 8px;
