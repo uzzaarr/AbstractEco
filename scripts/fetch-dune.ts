@@ -11,7 +11,8 @@ const VOLUME_TRACKER_OUT_FILE = path.join(PUBLIC_DIR, "volume-tracker-cache.json
 
 const ECOSYSTEM_QUERY_ID = 7434732;
 const WALLET_QUERY_ID = 7436536;
-const VOLUME_TRACKER_QUERY_ID = 7550279;
+const VOLUME_TRACKER_QUERY_ID = 7550909;
+const DUNE_PAGE_SIZE = 100000;
 
 const force = process.argv.includes('--force');
 
@@ -30,20 +31,8 @@ async function checkAndFetchQuery(queryId: number, outFile: string, transformFn?
 
   console.log(`[Dune Fetcher] Fetching results for query ${queryId}...`);
   try {
-    let fetchUrl = `https://api.dune.com/api/v1/query/${queryId}/results?limit=100000`;
-    
-    const response = await fetch(fetchUrl, {
-      method: 'GET',
-      headers: { 'x-dune-api-key': DUNE_API_KEY! }
-    });
-
-    if (!response.ok) {
-        throw new Error(`HTTP Error Status: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const rows = data.result?.rows || [];
-    console.log(`[Dune Fetcher] Received ${rows.length} rows for query ${queryId}.`);
+    const rows = await fetchAllQueryRows(queryId);
+    console.log(`[Dune Fetcher] Received ${rows.length} total rows for query ${queryId}.`);
     
     const finalData = transformFn ? transformFn(rows) : rows;
 
@@ -60,6 +49,53 @@ async function checkAndFetchQuery(queryId: number, outFile: string, transformFn?
     console.error(`[Dune Fetcher] FATAL: fetch failed for query ${queryId} and no prior cache exists:`, err.message);
     process.exit(1);
   }
+}
+
+async function fetchAllQueryRows(queryId: number) {
+  const rows: any[] = [];
+  let offset = 0;
+  let page = 1;
+  let expectedTotal: number | undefined;
+
+  while (true) {
+    const fetchUrl = new URL(`https://api.dune.com/api/v1/query/${queryId}/results`);
+    fetchUrl.searchParams.set('limit', DUNE_PAGE_SIZE.toString());
+    fetchUrl.searchParams.set('offset', offset.toString());
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: { 'x-dune-api-key': DUNE_API_KEY! }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error Status: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const pageRows = data.result?.rows || [];
+    const metadata = data.result?.metadata || {};
+    expectedTotal = metadata.total_row_count ?? metadata.totalRowCount ?? expectedTotal;
+
+    rows.push(...pageRows);
+    console.log(`[Dune Fetcher] Page ${page}: ${pageRows.length} rows for query ${queryId}.`);
+
+    const nextOffset = data.next_offset ?? data.nextOffset ?? data.result?.next_offset ?? data.result?.nextOffset;
+    if (typeof nextOffset === 'number' && nextOffset > offset && pageRows.length > 0) {
+      offset = nextOffset;
+    } else if (expectedTotal && rows.length < expectedTotal && pageRows.length > 0) {
+      offset += pageRows.length;
+    } else {
+      break;
+    }
+
+    page += 1;
+  }
+
+  if (expectedTotal && rows.length < expectedTotal) {
+    console.warn(`[Dune Fetcher] WARN: query ${queryId} returned ${rows.length}/${expectedTotal} rows.`);
+  }
+
+  return rows;
 }
 
 async function main() {
