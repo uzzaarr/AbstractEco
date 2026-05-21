@@ -24,6 +24,7 @@ function formatVolume(v: number): string {
 export default function GravityPoolTab({ data }: { data: DashboardData }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [metric, setMetric] = useState<Metric>('volume');
+  const [containerWidth, setContainerWidth] = useState(0);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string; value: number } | null>(null);
 
   const nodes = useMemo<Node[]>(() => {
@@ -34,7 +35,8 @@ export default function GravityPoolTab({ data }: { data: DashboardData }) {
 
     const maxValue = Math.max(...data.projects.map(valueOf));
     const floor = metric === 'volume' ? 100 : 10;
-    const radiusScale = d3.scaleLog().domain([floor, maxValue || floor * 10]).range([20, 80]).clamp(true);
+    const radiusMax = Math.max(maxValue || 0, floor * 10);
+    const radiusScale = d3.scaleLog().domain([floor, radiusMax]).range([20, 80]).clamp(true);
 
     return data.projects.map(p => {
       const assetData = PROJECT_ASSETS[p.id] || { color: '#00FF66', logo: '' };
@@ -51,9 +53,22 @@ export default function GravityPoolTab({ data }: { data: DashboardData }) {
   }, [data.projects, metric]);
 
   useEffect(() => {
-    if (!containerRef.current || nodes.length === 0) return;
+    if (!containerRef.current) return;
 
-    const width = containerRef.current.clientWidth;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(Math.round(entry.contentRect.width));
+    });
+
+    observer.observe(containerRef.current);
+    setContainerWidth(containerRef.current.clientWidth);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || nodes.length === 0 || containerWidth === 0) return;
+
+    const width = containerWidth;
     const height = 500;
 
     d3.select(containerRef.current).select('svg').remove();
@@ -163,7 +178,7 @@ export default function GravityPoolTab({ data }: { data: DashboardData }) {
     return () => {
       simulation.stop();
     };
-  }, [nodes]);
+  }, [nodes, containerWidth]);
 
   const metricLabel = metric === 'volume' ? 'Volume (30d)' : 'Users (30d)';
   const tooltipValue = tooltip

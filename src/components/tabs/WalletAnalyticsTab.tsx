@@ -12,7 +12,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
 
   // Auto-load if there's a cached address we recently searched
   useEffect(() => {
-    const lastSearched = localStorage.getItem('last_searched_wallet');
+    const lastSearched = safeLocalStorageGet('last_searched_wallet');
     if (lastSearched) {
       setAddress(lastSearched);
       loadWalletData(lastSearched, false);
@@ -20,14 +20,16 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
   }, []);
 
   const loadWalletData = async (targetAddress: string, simulateFetch = true) => {
-    if (!targetAddress || targetAddress.length < 10) {
-      setError('Please enter a valid wallet address');
+    const trimmedAddress = targetAddress.trim();
+    if (!/^0x[a-fA-F0-9]{40}$/.test(trimmedAddress)) {
+      setError('Please enter a valid EVM address.');
+      setWalletData(null);
       return;
     }
     setError('');
 
-    const cacheKey = `wallet_analysis_${targetAddress.toLowerCase()}`;
-    const cachedData = localStorage.getItem(cacheKey);
+    const cacheKey = `wallet_analysis_${trimmedAddress.toLowerCase()}`;
+    const cachedData = safeLocalStorageGet(cacheKey);
 
     if (cachedData && simulateFetch) {
       try {
@@ -36,7 +38,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
         const isFresh = (Date.now() - parsedData.timestamp) < 7 * 24 * 60 * 60 * 1000;
         if (isFresh) {
            setWalletData(parsedData.data);
-           localStorage.setItem('last_searched_wallet', targetAddress);
+           safeLocalStorageSet('last_searched_wallet', trimmedAddress);
            return;
         }
       } catch (e) {
@@ -55,7 +57,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
       
       const duneRows: any[] = await res.json();
 
-      const targetStr = targetAddress.toLowerCase().replace(/^0x/, '');
+      const targetStr = trimmedAddress.toLowerCase().replace(/^0x/, '');
       const walletRows = duneRows.filter(r => {
         // Robust address matching: search all values in the row
         return Object.values(r).some(val => {
@@ -92,7 +94,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
         };
 
         const projName = String(getVal(['project', 'app', 'protocol', 'name', 'dapp', 'to', 'contract']) || 'Unknown');
-        const pTrx = parseFloat(getVal(['txs', 'transactions', 'trx', 'tx_count', 'interactions', 'count'])) || 0;
+        const pTrx = parseInt(getVal(['txs', 'transactions', 'trx', 'tx_count', 'interactions', 'count']), 10) || 0;
         const pVol = parseFloat(getVal(['volume_usd', 'usd_volume', 'vol_usd', 'volume', 'vol', 'usd'])) || 0;
         // Prioritize USD gas over ETH gas
         const pGas = parseFloat(getVal(['fees_usd', 'gas_usd', 'fee_usd', 'gas_spent_usd', 'gas_fee_usd', 'gas_fees', 'fees', 'fee', 'gas_fee', 'gas', 'gas_spent', 'spent'])) || 0;
@@ -134,10 +136,8 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
       };
 
       setWalletData(parsedWalletData);
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: parsedWalletData }));
-      } catch(e) {}
-      localStorage.setItem('last_searched_wallet', targetAddress);
+      safeLocalStorageSet(cacheKey, JSON.stringify({ timestamp: Date.now(), data: parsedWalletData }));
+      safeLocalStorageSet('last_searched_wallet', trimmedAddress);
 
     } catch (err: any) {
       setError(err.message || 'An error occurred during analysis');
@@ -170,7 +170,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
       </div>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="relative z-10 w-full max-w-2xl mx-auto flex gap-3">
+      <form onSubmit={handleSearch} className="relative z-10 w-full max-w-2xl mx-auto flex flex-col sm:flex-row gap-3">
          <div className="relative flex-1">
            <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
            <input 
@@ -184,7 +184,7 @@ export default function WalletAnalyticsTab({ data }: { data: DashboardData }) {
          <button 
            type="submit" 
            disabled={analyzing}
-           className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-8 py-4 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+           className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-8 py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
          >
            {analyzing ? (
              <>
@@ -302,6 +302,22 @@ function MetricBox({ title, value, icon }: { title: string, value: string | numb
       <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
     </div>
   );
+}
+
+function safeLocalStorageGet(key: string) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeLocalStorageSet(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage quota or privacy-mode failures; the live cache still works.
+  }
 }
 
 

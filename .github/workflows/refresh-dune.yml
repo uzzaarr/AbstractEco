@@ -35,5 +35,5 @@ jobs:
             git commit -m "chore(data): weekly Dune refresh"
             git push
           else
-            echo "No data changes — nothing to commit."
+            echo "No data changes - nothing to commit."
           fi

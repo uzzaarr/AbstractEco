@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, Dot } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { DashboardData } from '../../types';
 import { PROJECT_ASSETS } from '../../lib/projectAssets';
 

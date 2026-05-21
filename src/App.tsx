@@ -22,7 +22,9 @@ const TABS = [
 export default function App() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeTab, setActiveTab] = useState(TABS[0].id);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +39,7 @@ export default function App() {
         setData(json);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
+        setLoadError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
       } finally {
         // Will be near-instant 
         setLoading(false);
@@ -48,17 +51,31 @@ export default function App() {
     // cache is completely static driven by background script.
   }, []);
 
+  const filteredProjects = useMemo(() => {
+    if (!data?.projects) return [];
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return data.projects;
+    return data.projects.filter((project) => {
+      return project.name.toLowerCase().includes(query) || project.id.toLowerCase().includes(query);
+    });
+  }, [data?.projects, searchQuery]);
+
+  const visibleData = useMemo<DashboardData | null>(() => {
+    if (!data) return null;
+    return { ...data, projects: filteredProjects };
+  }, [data, filteredProjects]);
+
   const topGainer = useMemo(() => {
-    if (!data?.projects || data.projects.length === 0) return null;
-    return data.projects.reduce((prev: ProjectData, current: ProjectData) => {
+    if (!visibleData?.projects || visibleData.projects.length === 0) return null;
+    return visibleData.projects.reduce((prev: ProjectData, current: ProjectData) => {
       // Find the one with most volume today
       const prevVol = prev.stats30d?.volume || 0;
       const currentVol = current.stats30d?.volume || 0;
       return (prevVol > currentVol) ? prev : current;
-    }, data.projects[0]);
-  }, [data?.projects]);
+    }, visibleData.projects[0]);
+  }, [visibleData?.projects]);
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-abstract-neon bg-[#0D0D0D]">
         <div className="w-16 h-16 relative flex items-center justify-center">
@@ -75,6 +92,20 @@ export default function App() {
                animate={{ scaleX: 1 }}
                transition={{ duration: 1, repeat: Infinity }}
             />
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError || !data || !visibleData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] px-4 text-white">
+        <div className="max-w-md rounded-2xl border border-red-400/20 bg-red-400/10 p-6 text-center">
+          <Database className="mx-auto mb-4 h-8 w-8 text-red-300" />
+          <h1 className="mb-2 text-xl font-semibold">Dashboard data unavailable</h1>
+          <p className="text-sm text-red-100/80">
+            {loadError || 'The local Dune cache could not be loaded.'}
+          </p>
         </div>
       </div>
     );
@@ -111,6 +142,8 @@ export default function App() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-abstract-neon transition-colors" />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search projects, contracts..." 
               className="w-64 bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-abstract-neon/50 focus:bg-white/10 transition-all placeholder:text-zinc-600"
             />
@@ -155,9 +188,14 @@ export default function App() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {activeTab === 'tracker' && <TrackerTab data={data} />}
-                    {activeTab === 'gravity' && <GravityPoolTab data={data} />}
-                    {activeTab === 'spotlight' && <SpotlightTab data={data} />}
+                    {filteredProjects.length === 0 && ['tracker', 'gravity', 'spotlight'].includes(activeTab) ? (
+                      <div className="rounded-2xl border border-white/5 bg-abstract-card p-8 text-center text-zinc-400">
+                        No projects match "{searchQuery.trim()}".
+                      </div>
+                    ) : null}
+                    {activeTab === 'tracker' && filteredProjects.length > 0 && <TrackerTab data={visibleData} />}
+                    {activeTab === 'gravity' && filteredProjects.length > 0 && <GravityPoolTab data={visibleData} />}
+                    {activeTab === 'spotlight' && filteredProjects.length > 0 && <SpotlightTab data={visibleData} />}
                     {activeTab === 'wallet' && <WalletAnalyticsTab data={data} />}
                     {activeTab === 'volume' && <VolumeTrackerTab />}
                   </motion.div>
@@ -191,7 +229,7 @@ export default function App() {
             accent="#A78BFA"
           />
           {topGainer ? (
-            <ProjectCard project={topGainer} label="Top Performer · 30d Vol" glow />
+            <ProjectCard project={topGainer} label="Top Performer - 30d Vol" glow />
           ) : (
             <GlobalMetricCard
               title="Top Performer"
