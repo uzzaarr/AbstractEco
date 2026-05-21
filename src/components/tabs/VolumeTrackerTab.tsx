@@ -1,12 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Activity,
   ArrowRight,
   BarChart3,
-  CalendarClock,
   CheckCircle2,
-  Database,
   Search,
   Wallet,
 } from 'lucide-react';
@@ -26,27 +24,17 @@ type VolumeTier = {
   threshold: string;
   image: string;
   accent: string;
+  nextName?: string;
+  nextVolume?: number;
 };
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) return '$0.00';
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-  if (value >= 1e3) return `$${(value / 1e3).toFixed(2)}k`;
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatDateTime(value: string): string {
-  if (!value) return 'N/A';
-  const normalized = value.replace(' UTC', 'Z');
-  const date = new Date(normalized);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return value.toLocaleString(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
 
@@ -71,6 +59,8 @@ function getVolumeTier(volume: number): VolumeTier | null {
       threshold: '> $5k 90d volume',
       image: TIER_ASSETS.builder,
       accent: '#38BDF8',
+      nextName: 'Quant',
+      nextVolume: 10000,
     };
   }
 
@@ -80,10 +70,39 @@ function getVolumeTier(volume: number): VolumeTier | null {
       threshold: '> $1k 90d volume',
       image: TIER_ASSETS.explorer,
       accent: '#00FF66',
+      nextName: 'Builder',
+      nextVolume: 5000,
     };
   }
 
   return null;
+}
+
+function getProgressDetails(volume: number, tier: VolumeTier | null) {
+  if (!tier) {
+    return {
+      label: 'Next: Explorer at $1,000.00',
+      remaining: `${formatUsd(Math.max(1000 - volume, 0))} to go`,
+      progress: Math.min((volume / 1000) * 100, 100),
+    };
+  }
+
+  if (!tier.nextVolume) {
+    return {
+      label: 'Highest tier unlocked',
+      remaining: 'Quant role eligible',
+      progress: 100,
+    };
+  }
+
+  const tierFloor = tier.name === 'Builder' ? 5000 : 1000;
+  const range = tier.nextVolume - tierFloor;
+
+  return {
+    label: `Next: ${tier.nextName} at ${formatUsd(tier.nextVolume)}`,
+    remaining: `${formatUsd(Math.max(tier.nextVolume - volume, 0))} to go`,
+    progress: Math.min(((volume - tierFloor) / range) * 100, 100),
+  };
 }
 
 export default function VolumeTrackerTab() {
@@ -99,11 +118,6 @@ export default function VolumeTrackerTab() {
       setAddress(lastSearched);
     }
   }, []);
-
-  const cacheUpdatedAt = useMemo(() => {
-    if (!cache?.length) return '';
-    return cache[0]?.updated_at || '';
-  }, [cache]);
 
   const loadCache = async () => {
     if (cache) return cache;
@@ -159,6 +173,7 @@ export default function VolumeTrackerTab() {
   };
 
   const tier = result ? getVolumeTier(result.estimated_volume_usd) : null;
+  const progressDetails = result ? getProgressDetails(result.estimated_volume_usd, tier) : null;
 
   return (
     <div className="flex flex-col gap-8 text-white relative">
@@ -168,22 +183,10 @@ export default function VolumeTrackerTab() {
             <BarChart3 className="w-6 h-6 text-[#00FF66]" />
             Volume Tracker
           </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm text-zinc-400">Estimated Abstract swap volume from Dune's weekly cached data.</p>
-            <div className="flex items-center gap-1 bg-white/5 border border-white/5 px-2 py-0.5 rounded text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-              <CalendarClock className="w-3 h-3" />
-              90D Snapshot
-            </div>
-            {cacheUpdatedAt && (
-              <span className="text-[11px] text-zinc-500">
-                Updated {formatDateTime(cacheUpdatedAt)}
-              </span>
-            )}
-          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-2xl mx-auto flex gap-3">
+      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-2xl mx-auto flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
           <input
@@ -197,7 +200,7 @@ export default function VolumeTrackerTab() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-8 py-4 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-8 py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
         >
           {loading ? (
             <>
@@ -228,15 +231,62 @@ export default function VolumeTrackerTab() {
             exit={{ opacity: 0, y: -10 }}
             className="flex flex-col gap-6"
           >
-            <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div>
-                <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-1">Wallet</p>
-                <p className="font-mono text-sm text-zinc-300">{shortAddress(result.user_address)}</p>
+            <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 overflow-hidden relative">
+              {tier && (
+                <div
+                  className="absolute -top-20 -right-20 w-72 h-72 blur-[90px] rounded-full opacity-20 pointer-events-none"
+                  style={{ backgroundColor: tier.accent }}
+                />
+              )}
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-20 h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0"
+                    style={tier ? { borderColor: `${tier.accent}55`, backgroundColor: `${tier.accent}12` } : undefined}
+                  >
+                    {tier ? (
+                      <img src={tier.image} alt={tier.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <BarChart3 className="w-9 h-9 text-zinc-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-1">Eligible Role</p>
+                    <h3 className="text-3xl font-bold text-white">{tier ? tier.name : 'No tier yet'}</h3>
+                    <p className="text-sm text-zinc-400">
+                      {tier ? tier.threshold : 'Reach more than $1k estimated 90d swap volume to unlock Explorer.'}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={DISCORD_INVITE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+                >
+                  Apply
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
-              <div className="flex items-center gap-2 text-xs text-zinc-500">
-                <Database className="w-4 h-4 text-[#00FF66]" />
-                Dune query 7550279, refreshed weekly
-              </div>
+              {progressDetails && (
+                <div className="relative z-10 mt-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-zinc-400 mb-2">
+                    <span>{progressDetails.label}</span>
+                    <span className="font-mono text-zinc-500">{progressDetails.remaining}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-white/5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#00FF66]"
+                      style={{ width: `${Math.max(progressDetails.progress, 3)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-3 text-xs text-zinc-500">
+              <span className="font-mono">{shortAddress(result.user_address)}</span>
+              <span>90-day swap estimate</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -256,45 +306,6 @@ export default function VolumeTrackerTab() {
                 subtitle={`${result.dex_confirmed_tx_count.toLocaleString()} tx`}
                 icon={<CheckCircle2 className="w-5 h-5 text-emerald-400" />}
               />
-            </div>
-
-            <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 overflow-hidden relative">
-              {tier && (
-                <div
-                  className="absolute -top-16 -right-16 w-52 h-52 blur-[70px] rounded-full opacity-20 pointer-events-none"
-                  style={{ backgroundColor: tier.accent }}
-                />
-              )}
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="w-20 h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0"
-                    style={tier ? { borderColor: `${tier.accent}55`, backgroundColor: `${tier.accent}12` } : undefined}
-                  >
-                    {tier ? (
-                      <img src={tier.image} alt={tier.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <BarChart3 className="w-9 h-9 text-zinc-600" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-1">Eligible Role</p>
-                    <h3 className="text-2xl font-bold text-white">{tier ? tier.name : 'No tier yet'}</h3>
-                    <p className="text-sm text-zinc-400">
-                      {tier ? tier.threshold : 'Reach more than $1k estimated 90d swap volume to unlock Explorer.'}
-                    </p>
-                  </div>
-                </div>
-                <a
-                  href={DISCORD_INVITE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
-                >
-                  Apply
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
             </div>
           </motion.div>
         )}

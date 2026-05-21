@@ -48,7 +48,7 @@ const CustomTick = (props: any) => {
 export default function TrackerTab({ data }: { data: DashboardData }) {
   const [metric, setMetric] = useState<'volume' | 'trx'>('volume');
   
-  // Transform data for recharts. Relay and LiFi are excluded from the volume view only —
+  // Transform data for recharts. Relay and LiFi are excluded from the volume view only
   // they dwarf every other project and crush the y-axis so the rest is unreadable.
   const VOLUME_EXCLUDE = new Set(['relay', 'lifi']);
   const chartData = useMemo(() => {
@@ -95,9 +95,6 @@ export default function TrackerTab({ data }: { data: DashboardData }) {
             Transactions
           </button>
         </div>
-        {metric === 'volume' && (
-          <span className="text-[11px] text-zinc-500">Relay and LiFi excluded for readability — see Spotlight for full ranking.</span>
-        )}
       </div>
 
       <div className="h-[400px] w-full relative z-10 overflow-x-auto overflow-y-hidden">
