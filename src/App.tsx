@@ -9,12 +9,14 @@ const TrackerTab = React.lazy(() => import('./components/tabs/TrackerTab'));
 const GravityPoolTab = React.lazy(() => import('./components/tabs/GravityPoolTab'));
 const SpotlightTab = React.lazy(() => import('./components/tabs/SpotlightTab'));
 const WalletAnalyticsTab = React.lazy(() => import('./components/tabs/WalletAnalyticsTab'));
+const VolumeTrackerTab = React.lazy(() => import('./components/tabs/VolumeTrackerTab'));
 
 const TABS = [
   { id: 'tracker', label: 'Tracker' },
   { id: 'gravity', label: 'Gravity Pool' },
   { id: 'spotlight', label: 'Spotlight' },
-  { id: 'wallet', label: 'Wallet Analytics' }
+  { id: 'wallet', label: 'Wallet Analytics' },
+  { id: 'volume', label: 'Volume Tracker' }
 ];
 
 export default function App() {
@@ -157,6 +159,7 @@ export default function App() {
                     {activeTab === 'gravity' && <GravityPoolTab data={data} />}
                     {activeTab === 'spotlight' && <SpotlightTab data={data} />}
                     {activeTab === 'wallet' && <WalletAnalyticsTab data={data} />}
+                    {activeTab === 'volume' && <VolumeTrackerTab />}
                   </motion.div>
               </AnimatePresence>
             </Suspense>

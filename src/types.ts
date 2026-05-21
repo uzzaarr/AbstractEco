@@ -24,3 +24,16 @@ export interface DashboardData {
   projects: ProjectData[];
   updatedAt: string;
 }
+
+export interface VolumeTrackerData {
+  user_address: string;
+  estimated_volume_usd: number;
+  swap_transactions: number;
+  dex_confirmed_volume_usd: number;
+  fallback_transfer_volume_usd: number;
+  dex_confirmed_tx_count: number;
+  fallback_tx_count: number;
+  first_swap: string;
+  last_swap: string;
+  updated_at: string;
+}

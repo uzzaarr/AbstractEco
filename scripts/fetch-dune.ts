@@ -7,6 +7,11 @@ const DUNE_API_KEY = process.env.DUNE_API_KEY;
 const PUBLIC_DIR = path.join(process.cwd(), "public", "data");
 const ECOSYSTEM_OUT_FILE = path.join(PUBLIC_DIR, "dune-cache.json");
 const WALLET_OUT_FILE = path.join(PUBLIC_DIR, "wallet-cache.json");
+const VOLUME_TRACKER_OUT_FILE = path.join(PUBLIC_DIR, "volume-tracker-cache.json");
+
+const ECOSYSTEM_QUERY_ID = 7434732;
+const WALLET_QUERY_ID = 7436536;
+const VOLUME_TRACKER_QUERY_ID = 7550279;
 
 const force = process.argv.includes('--force');
 
@@ -67,8 +72,9 @@ async function main() {
     fs.mkdirSync(PUBLIC_DIR, { recursive: true });
   }
 
-  await checkAndFetchQuery(7434732, ECOSYSTEM_OUT_FILE, transformDuneData);
-  await checkAndFetchQuery(7436536, WALLET_OUT_FILE); // Save raw rows for wallet analytics
+  await checkAndFetchQuery(ECOSYSTEM_QUERY_ID, ECOSYSTEM_OUT_FILE, transformDuneData);
+  await checkAndFetchQuery(WALLET_QUERY_ID, WALLET_OUT_FILE); // Save raw rows for wallet analytics
+  await checkAndFetchQuery(VOLUME_TRACKER_QUERY_ID, VOLUME_TRACKER_OUT_FILE);
 }
 
 function transformDuneData(rows: any[]) {
