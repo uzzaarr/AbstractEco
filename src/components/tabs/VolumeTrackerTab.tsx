@@ -13,6 +13,20 @@ import {
 import { VolumeTrackerData } from '../../types';
 
 const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/;
+const DISCORD_INVITE_URL = 'https://discord.gg/UtR5EDfK';
+
+const TIER_ASSETS = {
+  explorer: new URL('../../../roleslogos/explorer.webp', import.meta.url).href,
+  builder: new URL('../../../roleslogos/builder.webp', import.meta.url).href,
+  quant: new URL('../../../roleslogos/quant.webp', import.meta.url).href,
+};
+
+type VolumeTier = {
+  name: string;
+  threshold: string;
+  image: string;
+  accent: string;
+};
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) return '$0.00';
@@ -39,6 +53,37 @@ function formatDateTime(value: string): string {
 function shortAddress(address: string): string {
   if (!address || address.length < 12) return address;
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function getVolumeTier(volume: number): VolumeTier | null {
+  if (volume > 10000) {
+    return {
+      name: 'Quant',
+      threshold: '> $10k 90d volume',
+      image: TIER_ASSETS.quant,
+      accent: '#A78BFA',
+    };
+  }
+
+  if (volume > 5000) {
+    return {
+      name: 'Builder',
+      threshold: '> $5k 90d volume',
+      image: TIER_ASSETS.builder,
+      accent: '#38BDF8',
+    };
+  }
+
+  if (volume > 1000) {
+    return {
+      name: 'Explorer',
+      threshold: '> $1k 90d volume',
+      image: TIER_ASSETS.explorer,
+      accent: '#00FF66',
+    };
+  }
+
+  return null;
 }
 
 export default function VolumeTrackerTab() {
@@ -113,12 +158,7 @@ export default function VolumeTrackerTab() {
     analyzeAddress(address);
   };
 
-  const dexShare = result?.estimated_volume_usd
-    ? Math.max(0, Math.min(100, (result.dex_confirmed_volume_usd / result.estimated_volume_usd) * 100))
-    : 0;
-  const fallbackShare = result?.estimated_volume_usd
-    ? Math.max(0, Math.min(100, (result.fallback_transfer_volume_usd / result.estimated_volume_usd) * 100))
-    : 0;
+  const tier = result ? getVolumeTier(result.estimated_volume_usd) : null;
 
   return (
     <div className="flex flex-col gap-8 text-white relative">
@@ -216,49 +256,44 @@ export default function VolumeTrackerTab() {
                 subtitle={`${result.dex_confirmed_tx_count.toLocaleString()} tx`}
                 icon={<CheckCircle2 className="w-5 h-5 text-emerald-400" />}
               />
-              <MetricBox
-                title="Fallback Detected"
-                value={formatUsd(result.fallback_transfer_volume_usd)}
-                subtitle={`${result.fallback_tx_count.toLocaleString()} tx`}
-                icon={<Database className="w-5 h-5 text-purple-400" />}
-              />
-              <MetricBox
-                title="First Swap"
-                value={formatDateTime(result.first_swap)}
-                icon={<CalendarClock className="w-5 h-5 text-zinc-400" />}
-                compact
-              />
-              <MetricBox
-                title="Last Swap"
-                value={formatDateTime(result.last_swap)}
-                icon={<CalendarClock className="w-5 h-5 text-zinc-400" />}
-                compact
-              />
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                <div>
-                  <h3 className="font-semibold text-white">Coverage Split</h3>
-                  <p className="text-sm text-zinc-500">DEX-confirmed volume plus transfer-detected fallback volume.</p>
+            <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 overflow-hidden relative">
+              {tier && (
+                <div
+                  className="absolute -top-16 -right-16 w-52 h-52 blur-[70px] rounded-full opacity-20 pointer-events-none"
+                  style={{ backgroundColor: tier.accent }}
+                />
+              )}
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-20 h-20 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0"
+                    style={tier ? { borderColor: `${tier.accent}55`, backgroundColor: `${tier.accent}12` } : undefined}
+                  >
+                    {tier ? (
+                      <img src={tier.image} alt={tier.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <BarChart3 className="w-9 h-9 text-zinc-600" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-1">Eligible Role</p>
+                    <h3 className="text-2xl font-bold text-white">{tier ? tier.name : 'No tier yet'}</h3>
+                    <p className="text-sm text-zinc-400">
+                      {tier ? tier.threshold : 'Reach more than $1k estimated 90d swap volume to unlock Explorer.'}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs text-zinc-500">
-                  {dexShare.toFixed(1)}% confirmed / {fallbackShare.toFixed(1)}% fallback
-                </span>
-              </div>
-              <div className="h-3 rounded-full overflow-hidden bg-white/5 flex">
-                <div className="h-full bg-[#00FF66]" style={{ width: `${dexShare}%` }} />
-                <div className="h-full bg-purple-400" style={{ width: `${fallbackShare}%` }} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 text-sm">
-                <div className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-                  <span className="text-zinc-400">DEX confirmed</span>
-                  <span className="font-mono text-[#00FF66]">{formatUsd(result.dex_confirmed_volume_usd)}</span>
-                </div>
-                <div className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3">
-                  <span className="text-zinc-400">Fallback detected</span>
-                  <span className="font-mono text-purple-300">{formatUsd(result.fallback_transfer_volume_usd)}</span>
-                </div>
+                <a
+                  href={DISCORD_INVITE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#00FF66] hover:bg-[#00FF66]/90 text-black font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+                >
+                  Apply
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </motion.div>
@@ -273,13 +308,11 @@ function MetricBox({
   value,
   icon,
   subtitle,
-  compact = false,
 }: {
   title: string;
   value: string | number;
   icon: React.ReactNode;
   subtitle?: string;
-  compact?: boolean;
 }) {
   return (
     <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden group hover:border-white/10 transition-colors min-h-[140px]">
@@ -287,7 +320,7 @@ function MetricBox({
         <span className="text-sm font-medium">{title}</span>
         {icon}
       </div>
-      <span className={`${compact ? 'text-base' : 'text-2xl'} font-bold tracking-tight text-white break-words`}>
+      <span className="text-2xl font-bold tracking-tight text-white break-words">
         {value}
       </span>
       {subtitle && <span className="text-xs text-zinc-500">{subtitle}</span>}
