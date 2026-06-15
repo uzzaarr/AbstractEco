@@ -1,130 +1,130 @@
 {
   "globalData": {
-    "totalVolume30d": 7405696.89,
-    "totalUsers30d": 28965,
-    "totalTrx30d": 37252917
+    "totalVolume30d": 7357413.149999999,
+    "totalUsers30d": 27508,
+    "totalTrx30d": 37412798
   },
   "projects": [
     {
       "id": "relay",
       "name": "Relay",
       "stats30d": {
-        "volume": 5422362.85,
-        "users": 9651,
-        "trx": 37916
+        "volume": 5620677.67,
+        "users": 9220,
+        "trx": 44131
       },
-      "volume": 5422362.85,
-      "users": 9651,
-      "trx": 37916
+      "volume": 5620677.67,
+      "users": 9220,
+      "trx": 44131
     },
     {
       "id": "lifi",
       "name": "LiFi",
       "stats30d": {
-        "volume": 1367696.17,
-        "users": 2526,
-        "trx": 8713
+        "volume": 1286981.94,
+        "users": 2556,
+        "trx": 4803
       },
-      "volume": 1367696.17,
-      "users": 2526,
-      "trx": 8713
+      "volume": 1286981.94,
+      "users": 2556,
+      "trx": 4803
     },
     {
       "id": "maze-of-gain",
       "name": "Maze of Gain",
       "stats30d": {
-        "volume": 347016.47,
-        "users": 3112,
-        "trx": 49938
+        "volume": 243160.09,
+        "users": 2579,
+        "trx": 38310
       },
-      "volume": 347016.47,
-      "users": 3112,
-      "trx": 49938
+      "volume": 243160.09,
+      "users": 2579,
+      "trx": 38310
     },
     {
       "id": "gigaverse",
       "name": "Gigaverse",
       "stats30d": {
-        "volume": 180232.68,
-        "users": 3942,
-        "trx": 51191
+        "volume": 132483.57,
+        "users": 3924,
+        "trx": 55700
       },
-      "volume": 180232.68,
-      "users": 3942,
-      "trx": 51191
+      "volume": 132483.57,
+      "users": 3924,
+      "trx": 55700
     },
     {
       "id": "dyli-marketplace",
       "name": "DYLI Marketplace",
       "stats30d": {
-        "volume": 70105.88,
-        "users": 719,
-        "trx": 16969
+        "volume": 60705.75,
+        "users": 629,
+        "trx": 16268
       },
-      "volume": 70105.88,
-      "users": 719,
-      "trx": 16969
+      "volume": 60705.75,
+      "users": 629,
+      "trx": 16268
     },
     {
       "id": "moody-madness",
       "name": "Moody Madness",
       "stats30d": {
-        "volume": 11226.21,
-        "users": 7400,
-        "trx": 2006640
+        "volume": 7378.26,
+        "users": 7055,
+        "trx": 1471034
       },
-      "volume": 11226.21,
-      "users": 7400,
-      "trx": 2006640
+      "volume": 7378.26,
+      "users": 7055,
+      "trx": 1471034
     },
     {
       "id": "roach-racing",
       "name": "Roach Racing",
       "stats30d": {
-        "volume": 4898.73,
-        "users": 103,
-        "trx": 221
+        "volume": 3473.3,
+        "users": 305,
+        "trx": 381
       },
-      "volume": 4898.73,
-      "users": 103,
-      "trx": 221
+      "volume": 3473.3,
+      "users": 305,
+      "trx": 381
     },
     {
       "id": "ruyi-ember",
       "name": "Ruyi Ember",
       "stats30d": {
-        "volume": 1922.33,
-        "users": 240,
-        "trx": 17555
+        "volume": 2378.48,
+        "users": 260,
+        "trx": 36976
       },
-      "volume": 1922.33,
-      "users": 240,
-      "trx": 17555
+      "volume": 2378.48,
+      "users": 260,
+      "trx": 36976
     },
     {
       "id": "kuga-bash",
       "name": "Kuga Bash",
       "stats30d": {
-        "volume": 235.57,
-        "users": 207,
-        "trx": 10335
+        "volume": 174.09,
+        "users": 156,
+        "trx": 8474
       },
-      "volume": 235.57,
-      "users": 207,
-      "trx": 10335
+      "volume": 174.09,
+      "users": 156,
+      "trx": 8474
     },
     {
       "id": "rug-pull-bakery",
       "name": "Rug Pull Bakery",
       "stats30d": {
         "volume": 0,
-        "users": 1065,
-        "trx": 35053439
+        "users": 824,
+        "trx": 35736721
       },
       "volume": 0,
-      "users": 1065,
-      "trx": 35053439
+      "users": 824,
+      "trx": 35736721
     }
   ],
-  "updatedAt": "2026-06-08T04:03:19.531Z"
+  "updatedAt": "2026-06-15T04:19:27.932Z"
 }
